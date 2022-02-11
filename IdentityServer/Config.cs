@@ -30,7 +30,7 @@ namespace IdentityServer
                     AllowRememberConsent = false,
                     RedirectUris = new List<string>()
                     {
-                        "https://localhost:5002/singnin-oidc"
+                        "https://localhost:5002/signin-oidc"
                     },
                     PostLogoutRedirectUris = new List<string>()
                     {
