@@ -1,5 +1,4 @@
-﻿using IdentityModel.Client;
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -29,28 +28,6 @@ namespace Movies.Client
 
             services.AddScoped<IMovieApiService, MovieApiService>();
 
-            services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-            })
-            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
-            {
-                options.Authority = "https://localhost:5005";
-
-                options.ClientId = "movies_mvc_client";
-                options.ClientSecret = "secret";
-                options.ResponseType = "code";
-
-                options.Scope.Add("openid");
-                options.Scope.Add("profile");
-
-                options.SaveTokens = true;
-
-                options.GetClaimsFromUserInfoEndpoint = true;
-            });
-
             services.AddTransient<AuthenticationDelegatingHandler>();
 
             services.AddHttpClient("MoviesAPIClient", client =>
@@ -67,14 +44,36 @@ namespace Movies.Client
                 client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
             });
 
-            services.AddSingleton(new ClientCredentialsTokenRequest
+            services.AddHttpContextAccessor();
+
+            services.AddAuthentication(options =>
             {
-                Address = "https://localhost:5005/connect/token",
-                ClientId = "movieClient",
-                ClientSecret = "secret",
-                Scope = "movieAPI"
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            })
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
+            {
+                options.Authority = "https://localhost:5005";
+
+                options.ClientId = "movies_mvc_client";
+                options.ClientSecret = "secret";
+                options.ResponseType = "code id_token";
+
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+                options.Scope.Add("movieAPI");
+
+                options.SaveTokens = true;
+
+                options.GetClaimsFromUserInfoEndpoint = true;
             });
 
+            
+
+          
+
+           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -19,11 +19,11 @@ namespace Movies.Client.ApiServices
 
         public async Task<IEnumerable<Movie>> GetMovies()
         {
-            var httpClient = _httpClientFactory.CreateClient("MovieAPIClient");
+            var httpClient = _httpClientFactory.CreateClient("MoviesAPIClient");
 
             var request = new HttpRequestMessage(
                 HttpMethod.Get,
-                "/api/movies/");
+                "/api/movies");
 
             var response = await httpClient.SendAsync(
                 request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
