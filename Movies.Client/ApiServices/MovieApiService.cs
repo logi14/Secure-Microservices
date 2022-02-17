@@ -1,28 +1,38 @@
-﻿using Movies.Client.Models;
+﻿using IdentityModel.Client;
+using Movies.Client.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Movies.Client.ApiServices
 {
     public class MovieApiService : IMovieApiService
     {
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        public MovieApiService(IHttpClientFactory httpClientFactory)
+        {
+            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+        }
+
         public async Task<IEnumerable<Movie>> GetMovies()
         {
-            var movieList = new List<Movie>();
-            movieList.Add(
-                    new Movie
-                    {
-                        Id = 1,
-                        Genre = "Comics",
-                        Title = "asd",
-                        Rating = "9,2",
-                        ImageUrl = "image/src",
-                        ReleaseDate = DateTime.Now,
-                        Owner = "swn"
-                    });
+            var httpClient = _httpClientFactory.CreateClient("MovieAPIClient");
 
-            return await Task.FromResult(movieList);
+            var request = new HttpRequestMessage(
+                HttpMethod.Get,
+                "/api/movies/");
+
+            var response = await httpClient.SendAsync(
+                request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            var movieList = JsonConvert.DeserializeObject<List<Movie>>(content);
+            return movieList;
         }
         public async Task<Movie> GetMovie(string id)
         {
